@@ -18,7 +18,7 @@ def get_all_posts(datab: Session = Depends(get_db)):
 
 @router.post('/', status_code=status.HTTP_201_CREATED, response_model=schemas.PostCreate)
 def create_post(n_post: schemas.PostCreate, datab: Session = Depends(get_db),
-                user_id: id = Depends(oauth2.get_current_user)):
+                current_user: id = Depends(oauth2.get_current_user)):
 
     new_post = basemodel.Post(**n_post.dict())
     datab.add(new_post)  # add the new post
@@ -40,7 +40,8 @@ def get_post(post_id: int, datab: Session = Depends(get_db)):
 
 @router.delete('/{post_id}', status_code=status.HTTP_204_NO_CONTENT)
 def delete_post(post_id: int, datab: Session = Depends(get_db),
-                user_id: id = Depends(oauth2.get_current_user)):
+                current_user: id = Depends(oauth2.get_current_user)):
+
     deleted_post = datab.query(basemodel.Post).filter(basemodel.Post.id == post_id)
     if not deleted_post.first():  # check if there is not matched id
         raise HTTPException(status.HTTP_404_NOT_FOUND,
@@ -53,7 +54,7 @@ def delete_post(post_id: int, datab: Session = Depends(get_db),
 
 @router.put('/{post_id}')
 def update_post(post_id: int, post: schemas.PostCreate, datab: Session = Depends(get_db),
-                user_id: id = Depends(oauth2.get_current_user)):
+                current_user: id = Depends(oauth2.get_current_user)):
     post_query = datab.query(basemodel.Post).filter(basemodel.Post.id == post_id)
     updated_post = post_query.first()
     if updated_post is None:
